@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+import pandas as pd
+import requests
+import json
+
+# 데이터 읽어오기
+gps = pd.read_csv('./data/data.csv', encoding='cp949')
+
+# #str_100m 컬럼 추가
+# arr = np.array(gps)
+# temp = []
+# for j in range(len(arr)):
+#         latlon = str(round(arr[j, 3], 3)) + " " + str(round(arr[j, 4], 3))
+#         temp.append(latlon)
+# gps['str_100m'] = temp
+#
+# #str_10m 컬럼 추가
+# arr = np.array(gps)
+# temp = []
+# for j in range(len(arr)):
+#         latlon = str(round(arr[j, 3], 4)) + " " + str(round(arr[j, 4], 4))
+#         temp.append(latlon)
+# gps['str_10m'] = temp
+#
+# # 데이터프레임을 넘파이배열로 변환
+# temp = np.array(gps['str_100m'])
+# latlon = []
+# geo = []
+
+# 경도 위도로 나누기
+for i in tqdm(range(len(temp))):
+    latlon.append(temp[i].split())
+
+# 지오코딩
+api_key = '' # 발급받은 키 복사
+headers = {"Authorization" : "KakaoAK" + " " + 'api_key'}
+arr = np.array(gps)
+geo = []
+
+for i in tqdm(range(len(arr))):
+    try:
+        url = f"https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x={arr[i,3]}&y={arr[i,4]}"
+        rsp = requests.get(url, headers=headers)
+        result = json.loads(rsp.text)
+        geo.append(result['documents'][0]['address_name'])
+    except Exception:
+        geo.append(None)
+        continue
+
+gps['address'] = geo
+gps.to_csv('./data/gps_rent.csv', encoding='cp949')
+
+# str_100m 컬럼 추가
+for i in tqdm(range(1, 21)):
+  gps = pd.read_csv(f'/content/drive/MyDrive/GPS/tri_bike_parts{i}.csv')
+  arr = np.array(gps)
+  temp = []
+  for j in range(len(arr)):
+    latlon = str(round(arr[j, 2], 3)) + " " + str(round(arr[j, 3], 3))
+    temp.append(latlon)
+  gps['str_100m'] = temp
+  gps.to_csv(f'/content/drive/MyDrive/data/GPS(revised)/tri_bike_parts_revised{i}.csv')
