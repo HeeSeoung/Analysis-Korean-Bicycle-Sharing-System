@@ -62,3 +62,20 @@ for i in tqdm(range(1, 21)):
     temp.append(latlon)
   gps['str_100m'] = temp
   gps.to_csv(f'/content/drive/MyDrive/data/GPS(revised)/tri_bike_parts_revised{i}.csv')
+  
+  
+road = []
+for address in zip(geo):
+  headers = {
+      'Authorization': f"",
+      'Content-Type': 'application/x-www-form-urlencoded',
+  }
+
+  data = {'query':f"{address}"}
+
+  response = requests.get('https://dapi.kakao.com/v2/local/search/address.json', headers=headers, data=data)
+  result = json.loads(response.text)
+  try:
+    road.append(result['documents'][0]['address_name'])
+  except Exception:
+    road.append('')
